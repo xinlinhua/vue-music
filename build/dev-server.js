@@ -15,6 +15,7 @@ const webpackConfig = (process.env.NODE_ENV === 'testing' || process.env.NODE_EN
   ? require('./webpack.prod.conf')
   : require('./webpack.dev.conf')
 
+const router = require('../src/api/servive')
 // default port where dev server listens for incoming traffic
 const port = process.env.PORT || config.dev.port
 // automatically open browser, if not set will be false
@@ -24,6 +25,8 @@ const autoOpenBrowser = !!config.dev.autoOpenBrowser
 const proxyTable = config.dev.proxyTable
 
 const app = express()
+
+app.use('/api', router);
 const compiler = webpack(webpackConfig)
 
 const devMiddleware = require('webpack-dev-middleware')(compiler, {

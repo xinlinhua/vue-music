@@ -107,6 +107,9 @@
             },this.interval)
 
         }
+      },
+      destroyed(){
+        clearTimeout(this.timer)
       }
 
     }
