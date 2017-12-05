@@ -1,28 +1,39 @@
 <template>
-    <Scroll class="listview" :data="data">
+    <Scroll class="listview" :data="data" :listenScroll="listenScroll" ref="listview" @scroll="scroll" :probeType="probeType">
         <ul>
-            <li v-for="group in data" class="list-group">
+            <li v-for="group in data" class="list-group" ref="listGroup">
                 <h2 class="list-group-title">{{group.title}}</h2>
                 <ul>
-                    <li v-for="item in group.items" class="list-group-item">
+                    <li v-for="item in group.items" class="list-group-item"  @click="selsctItem(item)">
                         <img class="avatar" v-lazy="item.avatar" alt="">
                         <span class="name" >{{item.name}}</span>
                     </li>
                 </ul>
             </li>
         </ul>
-        <div class="list-shortcut" >
+        <div class="list-shortcut" @touchstart="onShortcutTouchStart" @touchmove.stop.prevent="onShortcutTouchStartMove">
             <ul>
-                <li v-for="(item,index) in shortcutList" class="item" @touchstart="onShortcutTouchStart">
+                <li v-for="(item,index) in shortcutList" class="item" :data-index="index" :class="{'current': currentIndex === index}">
                     {{item}}
                 </li>
             </ul>
+        </div>
+        <div class="list-fixed" v-show="fixedTitle" ref="fixed">
+            <h1 class="fixed-title">
+                {{fixedTitle}}
+            </h1>
+        </div>
+        <div class="loading-container" v-show="!data.length"> 
+         <Loading></Loading>
         </div>
     </Scroll>
 </template>
 <script>
     import Scroll from 'base/scroll/scroll'
     import {getData} from 'common/js/dom'
+    import Loading from 'base/loading/loading'
+    const ANCHORHEIGHT = 18
+    const TITLEHEIGHT = 30
     export default {
         props:{
             data:{
@@ -30,19 +41,111 @@
                 default: []
             }
         },
+        data(){
+            return {
+                scrollY:-1,
+                currentIndex: 0,
+                diff: -1
+
+            }
+        },
+        created(){
+            this.touch = {};
+            this.listenScroll = true;
+            this.listHeight = [];
+            this.probeType = 3;
+        },
         components:{
-            Scroll
+            Scroll,
+            Loading
         },
         computed: {
             shortcutList(){
                 return this.data.map((group)=>{
                     return group.title.substr(0,1)
                 })
+            },
+            fixedTitle(){
+                if(this.scrollY >0 )
+                {
+                    return ''
+                }
+                return this.data[this.currentIndex] ? this.data[this.currentIndex].title : ''
             }
         },
         methods:{
+            selsctItem(item){
+                this.$emit('select',item)
+            },
             onShortcutTouchStart(e){
                 let anchorIndex = getData(e.target,'index');
+                let firstTouch = e.touches[0];
+                this.touch.y1 = firstTouch.pageY;
+                this.touch.anchorIndex = anchorIndex;
+                this._scrollTo(anchorIndex);
+               
+            },
+            onShortcutTouchStartMove(e){
+                let firstTouch = e.touches[0];
+                this.touch.y2 = firstTouch.pageY;
+                let delta = (this.touch.y2 -this.touch.y1) / ANCHORHEIGHT | 0;
+                let anchorIndex = this.touch.anchorIndex + delta;
+                this._scrollTo(anchorIndex);
+            },
+            scroll(pos){
+              
+                this.scrollY = pos.y
+            },
+            _scrollTo(index){
+                this.scrollY = -this.listHeight[index]
+                 this.$refs.listview.scrollToElement(this.$refs.listGroup[index],0)
+            },
+            _calculateHeight(){
+                this.linstenHeight = [];
+                const list = this.$refs.listGroup;
+                let height = 0;
+                this.listHeight.push(height);
+                for (var i = 0; i < list.length; i++) {
+                    let item = list[i];
+                    height += item.clientHeight;
+                    this.listHeight.push(height);
+                    
+                }
+            }       
+        },
+        watch:{
+            data(){
+                setTimeout(()=>{
+                    this._calculateHeight();
+                },20)
+            },
+            scrollY(newY,old){
+                console.log(newY+'-'+old);
+                const listHeight = this.listHeight;
+                if(newY > 0){
+                     this.currentIndex = 0;
+                     return;
+                }
+                for (var i = 0; i < listHeight.length-1; i++) {
+                    let height1 = listHeight[i];
+                    let height2 = listHeight[i+1];
+                    if((-newY >= height1 && -newY < height2)){
+                        this.currentIndex = i;
+                        this.diff = height2 + newY;
+                        console.log('111='+this.currentIndex);
+                        return;
+                    }
+                   
+                }
+                this.currentIndex = listHeight.length -2;
+            },
+            diff(newVal){
+                let fixedTop = (newVal > 0 && newVal < TITLEHEIGHT) ? (newVal - TITLEHEIGHT) : 0;
+                if(this.fixedTop === fixedTop){
+                    return;
+                }
+                this.fixedTop = fixedTop;
+                this.$refs.fixed.style.transfrom = `translate3d(0,${fixedTop}px,0)`
             }
         }
     }

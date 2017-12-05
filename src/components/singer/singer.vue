@@ -1,7 +1,9 @@
 <template>
     <div class="singer" ref="singer">
-        <list-view :data="singerList"> </list-view>
+        <list-view :data="singerList" @select="selectSinger"> </list-view>
+        <router-view></router-view>
     </div>
+    
 </template>
 <script>
     import {getSingerList} from 'api/singer'
@@ -22,6 +24,12 @@
             this._getSingerList();
         },
         methods:{
+            selectSinger(singer){
+                console.log(singer)
+                this.$router.push({
+                    path: `/singer/${singer.id}`
+                })
+            },
             _getSingerList(){
                 getSingerList().then((res)=>{
                     
