@@ -22,6 +22,9 @@
                                 <img class="image" alt="" :src="currentSong.image">
                             </div>
                         </div>
+                        <div class="playing-lyric-wrapper">
+                            <div class="playing-lyric" >{{playingLyric}}</div>
+                        </div>
                     </div>
                     <scroll class="middle-r" ref="lyricList" :data="currentLyric && currentLyric.lines">
                         <div class="lyric-wrapper">
@@ -110,9 +113,10 @@ export default {
             songReady: false,
             currentTime: 0,
             radius: 32,
-            currentLyric: [],
+            currentLyric: null,
             currentLineNum: 0,
-            currentShow: 'cd'
+            currentShow: 'cd',
+            playingLyric: ''
         }
     },
     
@@ -261,9 +265,13 @@ export default {
             this.$refs.cdWrapper.style[transform] = ''
         },
         onPregressChange(percent){
-            this.$refs.audio.currentTime = percent * this.currentSong.duraction
+            const currentTime = percent * this.currentSong.duraction
+            this.$refs.audio.currentTime = currentTime
              if(!this.playing){
                 this.toggerPlaying();
+            }
+            if(this.currentLyric){
+                this.currentLyric.seek(currentTime * 1000)
             }
         },
          _getPosAndScale() {
@@ -282,11 +290,20 @@ export default {
             }
         },
         toggerPlaying(){
+            if(!this.songReady){
+                return 
+            }
             this.setPlaying(!this.playing)
+            if(this.currentLyric){
+                this.currentLyric.togglePlay()
+            }
         },
         next(){
             if(!this.songReady){
                 return ;
+            }
+            if(this.playList.length === 1){
+                this.loop()
             }
             let index = this.currentIndex + 1
             index = index === this.playList.length ? 0 : index
@@ -299,6 +316,9 @@ export default {
         prev(){
              if(!this.songReady){
                 return ;
+            }
+            if(this.playList.length === 1){
+                this.loop()
             }
             let index = this.currentIndex - 1
             index = index < 0 ? this.playList.length - 1 : index
@@ -336,18 +356,26 @@ export default {
         loop(){
             this.$refs.audio.currentTime = 0
             this.$refs.audio.play()
+            if(this.currentLyric){
+                this.currentLyric.seek(0);
+            }
         },
         getLyric(){
             this.currentSong.getLyric().then((res)=>{
                 this.currentLyric = new LyricParser(res,this.handelLyric)
+                
                     if(this.playing){
                         this.currentLyric.play()
                     }
               
+            }).catch(()=>{
+                this.currentLyric = null 
+                this.currentLineNum = 0
+                 this.playingLyric = ''
             })
         },
         handelLyric({lineNum,txt} ){
-            console.log(lineNum)
+        
             this.currentLineNum = lineNum
             if(lineNum > 5){
                 let lineEl = this.$refs.lyricLine[lineNum -5]
@@ -355,6 +383,7 @@ export default {
             }else {
                 this.$refs.lyricList.scrollTo(0,0, 1000)
             }
+            this.playingLyric = txt
         },
         _pad(num,n=2){
             let len = num.toString().length;
@@ -397,10 +426,13 @@ export default {
             if(newSong.id === oldSong.id){
                 return
             }
-            this.$nextTick(()=>{
+            if(this.currentLyric){
+                this.currentLyric.stop()
+            }
+           setTimeout(()=>{
                 this.$refs.audio.play()
                 this.getLyric()
-            })
+            },1000)
             
         },
         playing(newPlaying){

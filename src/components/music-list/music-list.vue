@@ -33,7 +33,9 @@
     const transform = prefixStyle('transform')
     const backdrop = prefixStyle('backdrop-filter')
     import {mapActions} from 'vuex'
+    import {playListMixin} from 'common/js/mixin'
 export default {
+    mixins: [playListMixin],
     components:{
         Scroll,
         SongList,
@@ -76,7 +78,7 @@ export default {
     },
     methods:{
         back(){
-            this.$router.push('/singer')
+            this.$router.back()
         },
         scroll(pos){
             this.scrollY = pos.y
@@ -89,6 +91,11 @@ export default {
         },
         random(){
             this.randomPlay({ list: this.songs})
+        },
+        handlePlayList(playList){
+            const buttom = playList.length > 0 ? '60px': ''
+            this.$refs.list.$el.style.bottom = buttom
+            this.$refs.list.refresh()
         },
         ...mapActions([
             'selectPlay',
