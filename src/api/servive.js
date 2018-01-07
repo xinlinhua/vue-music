@@ -1,62 +1,68 @@
 let express = require('express')
 
-let router  = express.Router();
+let router = express.Router();
 var axios = require('axios')
 
-router.get('/getDiscList',(req,res)=>{
-     var url = 'https://c.y.qq.com/splcloud/fcgi-bin/fcg_get_diss_by_tag.fcg';
-     
-     axios.get(url,{
+router.get('/getDiscList', (req, res) => {
+    var url = 'https://c.y.qq.com/splcloud/fcgi-bin/fcg_get_diss_by_tag.fcg';
+
+    axios.get(url, {
         headers: {
-        referer: 'https://c.y.qq.com/',
-        host: 'c.y.qq.com'
+            referer: 'https://c.y.qq.com/',
+            host: 'c.y.qq.com'
         },
         params: req.query
-     } ).then((resp)=>{
+    }).then((resp) => {
         res.json(resp.data)
-     }).catch((err)=>{
+    }).catch((err) => {
         console.log(err)
-     })
+    })
 })
 
-router.get('/getLyric',(req,res)=>{
+router.get('/getLyric', (req, res) => {
     var url = 'https://c.y.qq.com/lyric/fcgi-bin/fcg_query_lyric_new.fcg'
-    
-    axios.get(url,{
-       headers: {
-       referer: 'https://c.y.qq.com/',
-       host: 'c.y.qq.com'
-       },
-       params: req.query
-    } ).then((resp)=>{
+
+    axios.get(url, {
+        headers: {
+            referer: 'https://c.y.qq.com/',
+            host: 'c.y.qq.com'
+        },
+        params: req.query
+    }).then((resp) => {
         let ret = resp.data
         if (typeof ret === 'string') {
             var reg = /^\w+\(({[^()]+})\)$/
             var matches = ret.match(reg)
             if (matches) {
-              ret = JSON.parse(matches[1])
+                ret = JSON.parse(matches[1])
             }
-          }
-          res.json(ret)
-    }).catch((err)=>{
-       console.log(err)
+        }
+        res.json(ret)
+    }).catch((err) => {
+        console.log(err)
     })
 })
-router.get('/getSongList',(req,res)=>{
+router.get('/getSongList', (req, res) => {
     var url = 'https://c.y.qq.com/qzone/fcg-bin/fcg_ucc_getcdinfo_byids_cp.fcg'
-    
-    axios.get(url,{
-       headers: {
-       referer: 'https://c.y.qq.com/',
-       host: 'c.y.qq.com'
-       },
-       params: req.query
-    } ).then((resp)=>{
+
+    axios.get(url, {
+        headers: {
+            referer: 'https://c.y.qq.com/',
+            host: 'c.y.qq.com'
+        },
+        params: req.query
+    }).then((resp) => {
         let ret = resp.data
-       
+        if (typeof ret === 'string') {
+            var reg = /^\w+\(({.+})\)$/
+            var matches = ret.match(reg)
+            if (matches) {
+                ret = JSON.parse(matches[1])
+            }
+        }
         res.json(ret)
-    }).catch((err)=>{
-       console.log(err)
+    }).catch((err) => {
+        console.log(err)
     })
 })
 module.exports = router;

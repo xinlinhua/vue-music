@@ -44,13 +44,12 @@ export default {
                 return;
             }
             getSongList(this.disc.dissid).then((res)=>{
-                 function jsonCallback(data){
+                /* function jsonCallback(data){
                     return data;
                 }
-                var data = eval(res)
-                if(data.code === ERR_OK){
-                    
-                     this.songs = this._normalizeSong(data.cdlist[0].songlist)
+                var data = eval(res)*/
+                if(res.code === ERR_OK){
+                     this.songs = this._normalizeSong(res.cdlist[0].songlist)
                     
                 }
             })
