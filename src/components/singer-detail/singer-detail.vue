@@ -33,7 +33,7 @@ export default {
      }
     },
     created(){
-      console.log(this.singer);
+      
       this.getSingerDetail()
     },
     methods:{
@@ -70,7 +70,7 @@ export default {
 
   .singer-detail
     position:fixed;
-    z-index:1000;
+  
     top: 0;
     left: 0;
     right:0;

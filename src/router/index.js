@@ -21,7 +21,6 @@ export default new Router({
             component: Recommend,
             children: [{
                 path: ':id',
-
                 component: Disc
             }]
         }, {
@@ -30,20 +29,22 @@ export default new Router({
             component: Rank,
             children: [{
                 path: ':id',
-
                 component: Toplist
             }]
         }, {
             path: '/search',
             name: 'Search',
-            component: Search
+            component: Search,
+            children: [{
+                path: ':id',
+                component: SingerDetail
+            }]
         }, {
             path: '/singer',
             name: 'Singer',
             component: Singer,
             children: [{
                 path: ':id',
-
                 component: SingerDetail
             }]
 

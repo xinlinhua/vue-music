@@ -24,15 +24,16 @@ export function search(query, page, zhida, perpage) {
         p: page,
         zhidaqu: 1,
         catZhida: zhida ? 1 : 0,
-        t: 0,
+        t: '0',
         flag: 1,
         ie: 'utf-8',
         sem:1,
-        aggr:0,
+        aggr:'0',
         perpage, 
         n: perpage,
-        uid:0,
+        uid:'0',
         remoteplace: 'txt.mqq.all'
+        
     })
     return jsonp(url, data, option);
-}
+} 
