@@ -1,5 +1,5 @@
 <template>
-    <scroll class="suggest" :data="result" :pullup="pullup" :beforeScroll="beforeScroll" @scrollToEnd="searchMore" @beforeScroll="listScroll"ref="suggest">
+    <scroll class="suggest" :data="result" :pullup="pullup" :beforeScroll="beforeScroll" @scrollToEnd="searchMore" @beforeScroll="listScroll" ref="suggest">
         <ul class="suggest-list">
             <li class="suggest-item" v-for="item in result" @click="selectItem(item)">
                 <div class="icon">
@@ -100,6 +100,9 @@ export default {
         listScroll(){
             this.$emit('listScroll')
         },
+        refresh(){
+            this.$refs.suggest.refresh();
+        },
         _checkMore(data){
             const song = data.song
             if(!song.list.length || (song.curnum + song.curpage + perpage) > song.totalnum){
@@ -121,6 +124,7 @@ export default {
             }else{
                 this.insertSong(item)
             }
+            this.$emit('select')
               
         },
         _getResult(list){
