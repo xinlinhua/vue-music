@@ -71,8 +71,8 @@
                 </div>
             </div>
         </transition>
-        <transition name="mini">
-            <div class="mini-player" v-show="!fullScreen">
+        <transition name="mini" >
+            <div class="mini-player" v-show="!fullScreen" @click="open">
                 <div class="icon" @click="open">
                     <img :src="currentSong.image" :class="cdCls" alt="" width="40" height="40">
                 </div>
@@ -85,11 +85,12 @@
                      <i :class="miniIcon" class="icon-mini"@click.stop="toggerPlaying"></i>
                     </progress-circle>
                 </div>
-                <div class="control">
+                <div class="control" @click.stop="showPlayList">
                     <i class="icon-playlist"></i>
                 </div>
             </div>
         </transition>
+        <play-list ref="playlist"></play-list>
         <audio ref="audio" :src="currentSong.url" @canplay="ready" @error="error" @timeupdate="updateTime" @ended="end"></audio>
     </div>
 
@@ -105,6 +106,7 @@ import {playMode} from 'common/js/config'
 import {shuffle} from 'common/js/util'
 import LyricParser from 'lyric-parser'
 import Scroll from 'base/scroll/scroll'
+import PlayList from 'components/playlist/playlist'
 const transform = prefixStyle('transform')
 const transitionDuraction = prefixStyle('transitionDuraction')
 export default {
@@ -126,7 +128,8 @@ export default {
     components:{
         ProgressBar,
         ProgressCircle,
-        Scroll
+        Scroll,
+        PlayList
     },
     computed:{
         playIcon(){
@@ -273,6 +276,9 @@ export default {
             if(this.currentLyric){
                 this.currentLyric.seek(currentTime * 1000)
             }
+        },
+        showPlayList(){
+            this.$refs.playlist.show()
         },
          _getPosAndScale() {
             const targetWidth = 40

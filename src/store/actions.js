@@ -89,3 +89,27 @@ export const clearSearch = function({commit}){
 
     commit(types.SET_SEARCH_HISTORY,delectAllSearch()) 
 }
+
+export const deleteSong = function({commit,state},song){
+    let playlist = state.playList.slice()
+    let currentIndex = state.currentIndex
+    let sequenceList = state.sequenceList.slice()
+   
+    // 寻找当前歌曲是否存在
+    let pIndex = findIndex(playlist,song)
+    let sIndex = findIndex(sequenceList,song)
+    playlist.splice(pIndex,1)
+    sequenceList.splice(sIndex,1)
+    if(currentIndex > pIndex || currentIndex === playlist.length){
+        currentIndex--
+    }
+    commit(types.SET_SEQUENCE_LIST, sequenceList)
+
+    commit(types.SET_PLAY_LIST, playlist)
+    commit(types.SET_CURRENT_INDEX, currentIndex)
+    if(!playlist.length ){
+        commit(types.SET_PLAYING_STATE,false)
+    }else{
+        commit(types.SET_PLAYING_STATE,true)
+    }
+}

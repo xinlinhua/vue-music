@@ -53,7 +53,10 @@ router.get('/getSongList', (req, res) => {
         params: req.query
     }).then((resp) => {
         let ret = resp.data
+        console.log(11)
         if (typeof ret === 'string') {
+          
+            console.log(ret)
             var reg = /^\w+\(({.+})\)$/
             var matches = ret.match(reg)
             if (matches) {
