@@ -1,31 +1,39 @@
 <template>
     <transition>
-        <div class="add-song" v-show="showFlag">
-            <div class="hander">
+        <div class="add-song" v-show="showFlag" @click.stop>
+            <div class="header">
                 <div class="title">添加歌曲到列表</div>
-                <div class="close">
+                <div class="close" @click="hide">
                     <i class="icon-close"></i>
                 </div>
             </div>
             <div class="search-box-wrappe">
-
+              <search-box placeholder="搜索歌曲"  @query="search"></search-box>
             </div>
-            <div class="shortcut">
+            <div class="shortcut" v-show="!query">
                 
             </div>
-            <div class="search-result">
-
+            <div class="search-result" v-show="query">
+              <suggest :query='query' :showSinger="showSinger"></suggest>
             </div>
         </div>
     </transition>
 </template>
 
 <script>
+import SearchBox from 'base/search=box/search-box'
+import Suggest from 'components/suggest/suggest'
 export default {
     data(){
         return {
-            showFlag: flase
+            showFlag: false,
+            query: '',
+            showSinger: false
         }
+    },
+    components: {
+      SearchBox,
+      Suggest
     },
     methods:{
         show(){
@@ -33,6 +41,9 @@ export default {
         },
         hide(){
             this.showFlag = false
+        },
+        search(query){
+          this.query = query
         }
     }
 }
