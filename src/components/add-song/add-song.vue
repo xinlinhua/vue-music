@@ -7,14 +7,14 @@
                     <i class="icon-close"></i>
                 </div>
             </div>
-            <div class="search-box-wrappe">
-              <search-box placeholder="搜索歌曲"  @query="search"></search-box>
+            <div class="search-box-wrapper">
+              <search-box placeholder="搜索歌曲"  @query="ongQueryChange"></search-box>
             </div>
             <div class="shortcut" v-show="!query">
-                
+              <switches :switches="switches" :currentIndex="currentIndex" @switch="switchItem"></switches>
             </div>
             <div class="search-result" v-show="query">
-              <suggest :query='query' :showSinger="showSinger"></suggest>
+              <suggest :query='query'  @select="selectSuggest" :showSinger="showSinger" @listScroll="blurInput"></suggest>
             </div>
         </div>
     </transition>
@@ -23,17 +23,30 @@
 <script>
 import SearchBox from 'base/search=box/search-box'
 import Suggest from 'components/suggest/suggest'
+import {searchMixin} from 'common/js/mixin'
+import Switches from 'base/switches/switches'
 export default {
+    mixins: [searchMixin],
     data(){
         return {
             showFlag: false,
-            query: '',
-            showSinger: false
+            showSinger: false,
+            switches: [
+              {
+                name: '最近播放'
+              },
+              {
+                name: '搜索历史'
+              }
+            ],
+            currentIndex: 0
+            
         }
     },
     components: {
       SearchBox,
-      Suggest
+      Suggest,
+      Switches
     },
     methods:{
         show(){
@@ -42,9 +55,13 @@ export default {
         hide(){
             this.showFlag = false
         },
-        search(query){
-          this.query = query
+        selectSuggest(){
+          this.saveSearch()
+        },
+        switchItem(index){
+          this.currentIndex = index
         }
+      
     }
 }
 </script>
