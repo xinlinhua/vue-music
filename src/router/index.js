@@ -1,15 +1,17 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 //import HelloWorld from '@/components/HelloWorld'
-import Rank from '@/components/rank/rank'
-import Recommend from '@/components/recommend/recommend'
-import Search from '@/components/search/search'
-import Singer from '@/components/Singer/Singer'
-import SingerDetail from '@/components/singer-detail/singer-detail'
-import Disc from '@/components/disc/disc'
-import Toplist from '@/components/top-list/top-list'
+
 Vue.use(Router)
 
+const Recommend = () => import('@/components/recommend/recommend')
+const Rank = () => import('@/components/rank/rank')
+const Search = () => import('@/components/search/search')
+const Singer = () => import('@/components/Singer/Singer')
+const SingerDetail = () => import('@/components/singer-detail/singer-detail')
+const Disc =  () => import('@/components/disc/disc')
+const Toplist = () => import('@/components/top-list/top-list')
+const UserCenter =  () => import('@/components/user-center/user-center')
 export default new Router({
     routes: [{
             path: '/',
@@ -47,6 +49,13 @@ export default new Router({
                 path: ':id',
                 component: SingerDetail
             }]
+
+        },
+        {
+            path: '/user',
+            name: 'User',
+            component: UserCenter,
+           
 
         }
     ]

@@ -64,8 +64,8 @@
                         <div class="icon i-right" :class="disableCls">
                             <i class="icon-next" @click="next"></i>
                         </div>
-                        <div class="icon i-right">
-                            <i class="icon-not-favorite"></i>
+                        <div class="icon i-right" >
+                            <i class="icon" @click="toggleFavorite(currentSong)" :class="getFavoriteIcon(currentSong)"></i>
                         </div>
                     </div>
                 </div>
@@ -82,7 +82,7 @@
                 </div>
                 <div class="control">
                     <progress-circle :radius="radius" :percent="percent">
-                     <i :class="miniIcon" class="icon-mini"@click.stop="toggerPlaying"></i>
+                     <i :class="miniIcon" class="icon-mini" @click.stop="toggerPlaying"></i>
                     </progress-circle>
                 </div>
                 <div class="control" @click.stop="showPlayList">
@@ -91,13 +91,13 @@
             </div>
         </transition>
         <play-list ref="playlist"></play-list>
-        <audio ref="audio" :src="currentSong.url" @canplay="ready" @error="error" @timeupdate="updateTime" @ended="end"></audio>
+        <audio ref="audio" :src="currentSong.url" @play="ready" @error="error" @timeupdate="updateTime" @ended="end"></audio>
     </div>
 
 </template>
 
 <script >
-import {mapGetters,mapMutations}  from 'vuex'
+import {mapGetters,mapMutations, mapActions}  from 'vuex'
 import animations from 'create-keyframe-animation'
 import {prefixStyle} from 'common/js/dom'
 import ProgressBar from 'base/progress-bar/progress-bar'
@@ -155,7 +155,6 @@ export default {
             'fullScreen',
             'playing',
             'currentIndex',
-            
         ])
     },
     methods:{
@@ -277,6 +276,7 @@ export default {
         showPlayList(){
             this.$refs.playlist.show()
         },
+       
          _getPosAndScale() {
             const targetWidth = 40
             const paddingLeft = 40
@@ -307,6 +307,7 @@ export default {
             }
             if(this.playList.length === 1){
                 this.loop()
+                return
             }
             let index = this.currentIndex + 1
             index = index === this.playList.length ? 0 : index
@@ -322,6 +323,7 @@ export default {
             }
             if(this.playList.length === 1){
                 this.loop()
+                return
             }
             let index = this.currentIndex - 1
             index = index < 0 ? this.playList.length - 1 : index
@@ -333,9 +335,11 @@ export default {
         },
         ready(){
             this.songReady = true
+            this.savePlayHistory(this.currentSong)
         },
         error(){
             this.songReady = true
+          
         },
         updateTime(e){
             this.currentTime = e.target.currentTime
@@ -365,11 +369,14 @@ export default {
         },
         getLyric(){
             this.currentSong.getLyric().then((res)=>{
+                if(this.currentSong.lyric !== res){
+                    return
+                }
                 this.currentLyric = new LyricParser(res,this.handelLyric)
-                
-                    if(this.playing){
-                        this.currentLyric.play()
-                    }
+            
+                if(this.playing){
+                    this.currentLyric.play()
+                }
               
             }).catch(()=>{
                 this.currentLyric = null 
@@ -400,7 +407,8 @@ export default {
         ...mapMutations({
             setFullScreen: 'SET_FULL_SCREEN',
         
-        })
+        }),
+        ...mapActions(['savePlayHistory'])
     },
     watch:{
         currentSong(newSong,oldSong){
@@ -412,8 +420,12 @@ export default {
             }
             if(this.currentLyric){
                 this.currentLyric.stop()
+                this.currentTime = 0
+                this.playingLyric = ''
+                this.currentLineNum = 0
             }
-           setTimeout(()=>{
+            clearTimeout(this.timer)
+            this.timer = setTimeout(()=>{
                 this.$refs.audio.play()
                 this.getLyric()
             },1000)

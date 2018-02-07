@@ -9,12 +9,12 @@
                         <span class="clear" @click="showConfirm"><i class="icon-clear"></i></span>
                     </h1>
                 </div>
-                <Scroll class="list-content" :data="sequenceList" ref="list">
+                <Scroll class="list-content" :refreshDelay="refreshDelay" :data="sequenceList" ref="list">
                     <transition-group name="list" tag="ul">
                         <li :key="index" class="item" ref="listItem" v-for="(item,index) in sequenceList" @click="selectItem(item,index)">
                             <i class="current" :class="getCurrentIcon(item)"></i>
                             <span class="text">{{item.name}}</span>
-                            <span class="like"><i class="icon-not-favorite"></i></span>
+                            <span class="like" @click.stop="toggleFavorite(item)"><i :class="getFavoriteIcon(item)"></i></span>
                             <span class="delete" @click.stop="deleteSong(item)"><i class="icon-delete"></i></span>
                         </li>
                     </transition-group>
@@ -47,7 +47,8 @@ export default {
     data(){
         return {
             showFlag: false,
-            showSinger: false
+            showSinger: false,
+            refreshDelay: 100
         }
     },
     props:{
