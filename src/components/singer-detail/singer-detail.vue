@@ -9,7 +9,7 @@
 <script>
 import {mapGetters} from 'vuex'
 import {ERR_OK} from 'api/config'
-import {getSingerDetail} from 'api/singer'
+import {getSingerDetail, getSingerVkey} from 'api/singer'
 import {createSong} from 'common/js/song'
 import MusicList from '../music-list/music-list'
 export default {
@@ -42,6 +42,7 @@ export default {
             this.$router.push('/singer')
             return;
         }
+        
         getSingerDetail(this.singer.id).then(res=>{
           console.log(res);
           if(res.code === ERR_OK){
@@ -56,7 +57,15 @@ export default {
         list.forEach(item => {
           let {musicData} = item;
           if(musicData.songid && musicData.songmid){
-              ret.push(createSong(musicData))
+            console.log(getSingerDetail);
+              getSingerVkey(musicData.songmid).then((res) => {
+                
+                if(res.code === ERR_OK){
+                  let songVkey = res.data.items[0].vkey;
+                  const newSong = createSong(musicData, songVkey);
+                  ret.push(newSong)
+                }
+              })
           }
         });
         return ret;

@@ -68,4 +68,18 @@ router.get('/getSongList', (req, res) => {
         console.log(err)
     })
 })
+router.get('/getMusic', function (req, res) {
+    var url = 'https://c.y.qq.com/base/fcgi-bin/fcg_music_express_mobile3.fcg';
+    axios.get(url, { // 此处axios是运行在node.js中，所以此处发的是http请求而不是xhr请求
+      headers: { // 修改header骗过浏览器referer和host如下
+        referer: 'https://c.y.qq.com/',
+        host: 'c.y.qq.com'
+      },
+      params: req.query
+    }).then((response) => {
+      res.json(response.data) // 发送response.data给客户端
+    }).catch((err) => {
+      console.log(err)
+    })
+  })
 module.exports = router;
